@@ -1,8 +1,5 @@
-service: live020
-frameworkVersion: '3'
-
-plugins:
-  - serverless-esbuild
+service: cognito-serverless
+frameworkVersion: "4"
 
 package:
   individually: true
@@ -14,19 +11,70 @@ provider:
   deploymentMethod: direct
   architecture: arm64
 
-custom:
+build:
   esbuild:
-  bundle: true
-  minify: true
-  sourcemap: false
-  target: node20
-  exclude:
-    - '@aws-sdk/*'
-  define:
-    require.resolve: undefined
-  platform: node
-  concurrency: 10
+    bundle: true
+    minify: true
+    sourcemap: false
+    target: node20
+    exclude:
+      - "@aws-sdk/*"
+    define:
+      require.resolve: undefined
+    platform: node
 
+resources:
+  Resources:
+    UserPool:
+      Type: AWS::Cognito::UserPool
+      Properties:
+        UserPoolName: cognito-serverless-user-pool
+        MfaConfiguration: OFF
+        AutoVerifiedAttributes:
+          - email
+        AdminCreateUserConfig:
+          AllowAdminCreateUserOnly: false
+        UsernameAttributes:
+          - email
+        AccountRecoverySetting:
+          RecoveryMechanisms:
+            - Name: verified_email
+              Priority: 1
+        Policies:
+          PasswordPolicy:
+            MinimumLength: 10
+            RequireUppercase: true
+            RequireLowercase: true
+            RequireNumbers: true
+            RequireSymbols: true
+        Schema:
+          - Name: given_name
+            Mutable: true
+            Required: true
+            AttributeDataType: String
+          - Name: family_name
+            Mutable: true
+            Required: true
+            AttributeDataType: String
+          - Name: email
+            Mutable: true
+            Required: true
+    UserPoolClient:
+      Type: AWS::Cognito::UserPoolClient
+      Properties:
+        UserPoolId: !Ref UserPool
+        ClientName: cognito-serverless-user-pool-client
+        AccessTokenValidity: 15
+        RefreshTokenValidity: 1440 # 60 days
+        TokenValidityUnits:
+          RefreshToken: hours
+          AccessToken: hours
+        GenerateSecret: false
+        PreventUserExistenceErrors: ENABLED
+        ExplicitAuthFlows:
+          - ALLOW_ADMIN_USER_PASSWORD_AUTH
+          - ALLOW_USER_PASSWORD_AUTH
+          - ALLOW_REFRESH_TOKEN_AUTH
 functions:
   hello:
     handler: src/functions/hello.handler
