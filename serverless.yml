@@ -10,6 +10,8 @@ provider:
   runtime: nodejs20.x
   deploymentMethod: direct
   architecture: arm64
+  environment:
+    COGNITO_CLIENT_ID: !Ref UserPoolClient
 
 build:
   esbuild:
@@ -76,9 +78,10 @@ resources:
           - ALLOW_USER_PASSWORD_AUTH
           - ALLOW_REFRESH_TOKEN_AUTH
 functions:
-  hello:
-    handler: src/functions/hello.handler
+  signUp:
+    handler: src/functions/signUp.handler
+    environment:
     events:
       - httpApi:
-          method: GET
-          path: /hello
+          method: POST
+          path: /sign-up
