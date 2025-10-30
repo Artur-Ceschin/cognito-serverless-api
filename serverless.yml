@@ -85,3 +85,10 @@ functions:
       - httpApi:
           method: POST
           path: /sign-up
+  accountConfirmation:
+    handler: src/functions/accountConfirmation.handler
+    environment:
+    events:
+      - httpApi:
+          method: POST
+          path: /account-confirmation
