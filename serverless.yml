@@ -92,3 +92,10 @@ functions:
       - httpApi:
           method: POST
           path: /account-confirmation
+  singIn:
+    handler: src/functions/signIn.handler
+    environment:
+    events:
+      - httpApi:
+          method: POST
+          path: /sing-in
