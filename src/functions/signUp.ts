@@ -1,7 +1,7 @@
 import { cognitoClient } from '@/libs/cognitoClient';
 import { bodyParser } from '@/utils/bodyParser';
 import { response } from '@/utils/response';
-import { SignUpCommand } from '@aws-sdk/client-cognito-identity-provider';
+import { SignUpCommand, UsernameExistsException } from '@aws-sdk/client-cognito-identity-provider';
 import { APIGatewayProxyEventV2 } from 'aws-lambda';
 
 export async function handler(event: APIGatewayProxyEventV2) {
@@ -27,6 +27,8 @@ export async function handler(event: APIGatewayProxyEventV2) {
     const { UserSub } = await cognitoClient.send(command);
     return response(201, { userId: UserSub });
   } catch (error) {
-    return response(400, { message: (error as Error).message });
+    if(error instanceof UsernameExistsException)
+      return response(400, { message: 'This user is already in use' });
+    return response(500, { message: 'Internal server error' });
   }
 }
