@@ -99,3 +99,17 @@ functions:
       - httpApi:
           method: POST
           path: /sing-in
+  refreshToken:
+    handler: src/functions/refreshToken.handler
+    environment:
+    events:
+      - httpApi:
+          method: POST
+          path: /refresh-token
+  profile:
+    handler: src/functions/profile.handler
+    environment:
+    events:
+      - httpApi:
+          method: GET
+          path: /profile
