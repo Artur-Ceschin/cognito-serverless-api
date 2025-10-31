@@ -10,8 +10,25 @@ provider:
   runtime: nodejs20.x
   deploymentMethod: direct
   architecture: arm64
+  iam:
+    role:
+      statements:
+        - Effect: Allow
+          Action:
+            - cognito-idp:AdminGetUser
+          Resource:
+            - !GetAtt UserPool.Arn
   environment:
     COGNITO_CLIENT_ID: !Ref UserPoolClient
+    COGNITO_USER_POOL_ID: !Ref UserPool
+  httpApi:
+    authorizers:
+      CognitoAuthorizer:
+        type: jwt
+        identitySource: $request.header.Authorization
+        issuerUrl: !GetAtt UserPool.ProviderURL
+        audience:
+          - !Ref UserPoolClient
 
 build:
   esbuild:
@@ -77,6 +94,7 @@ resources:
           - ALLOW_ADMIN_USER_PASSWORD_AUTH
           - ALLOW_USER_PASSWORD_AUTH
           - ALLOW_REFRESH_TOKEN_AUTH
+
 functions:
   signUp:
     handler: src/functions/signUp.handler
@@ -84,28 +102,28 @@ functions:
     events:
       - httpApi:
           method: POST
-          path: /sign-up
+          path: /auth/sign-up
   accountConfirmation:
     handler: src/functions/accountConfirmation.handler
     environment:
     events:
       - httpApi:
           method: POST
-          path: /account-confirmation
+          path: /auth/account-confirmation
   singIn:
     handler: src/functions/signIn.handler
     environment:
     events:
       - httpApi:
           method: POST
-          path: /sing-in
+          path: /auth/sing-in
   refreshToken:
     handler: src/functions/refreshToken.handler
     environment:
     events:
       - httpApi:
           method: POST
-          path: /refresh-token
+          path: /auth/refresh-token
   profile:
     handler: src/functions/profile.handler
     environment:
@@ -113,3 +131,4 @@ functions:
       - httpApi:
           method: GET
           path: /profile
+          authorizer: CognitoAuthorizer
