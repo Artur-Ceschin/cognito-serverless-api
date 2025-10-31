@@ -96,6 +96,12 @@ resources:
           - ALLOW_REFRESH_TOKEN_AUTH
 
 functions:
+  cognitoCustomMessage:
+    handler: src/functions/cognitoCustomMessage.handler
+    events:
+      - cognitoUserPool:
+          pool: UserPool
+          trigger: CustomMessage
   signUp:
     handler: src/functions/signUp.handler
     environment:
