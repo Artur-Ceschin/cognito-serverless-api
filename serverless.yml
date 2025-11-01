@@ -1,8 +1,5 @@
 service: cognito-serverless
-frameworkVersion: "3"
-
-plugins:
-  - serverless-esbuild
+frameworkVersion: "4"
 
 package:
   individually: true
@@ -14,18 +11,17 @@ provider:
   deploymentMethod: direct
   architecture: arm64
 
-custom:
+build:
   esbuild:
-  bundle: true
-  minify: true
-  sourcemap: false
-  target: node20
-  exclude:
-    - "@aws-sdk/*"
-  define:
-    require.resolve: undefined
-  platform: node
-  concurrency: 10
+    bundle: true
+    minify: true
+    sourcemap: false
+    target: node20
+    exclude:
+      - "@aws-sdk/*"
+    define:
+      require.resolve: undefined
+    platform: node
 
 functions:
   hello:
